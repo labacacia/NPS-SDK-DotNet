@@ -4,7 +4,7 @@ English | [中文版](./NPS.Core.cn.md)
 
 > Root namespace: `NPS.Core`
 > NuGet: `LabAcacia.NPS.Core`
-> Spec: [NPS-1 NCP v0.7](https://github.com/labacacia/NPS-Release/blob/main/NPS-1-NCP.md)
+> Spec: [NPS-1 NCP v0.7](https://github.com/labacacia/NPS/blob/main/NPS-1-NCP.md)
 
 This package owns the wire format, the frame codec, the frame type registry, the anchor cache, and
 all shared exceptions / error codes. Every other package in the SDK depends on it.

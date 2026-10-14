@@ -4,7 +4,7 @@
 
 > 根命名空间：`NPS.Core`
 > NuGet：`LabAcacia.NPS.Core`
-> 规范：[NPS-1 NCP v0.7](https://github.com/labacacia/NPS-Release/blob/main/NPS-1-NCP.md)
+> 规范：[NPS-1 NCP v0.7](https://github.com/labacacia/NPS/blob/main/NPS-1-NCP.md)
 
 本包持有线路格式、帧编解码器、帧类型注册表、anchor 缓存、以及所有共享异常 / 错误码。
 SDK 中其他所有包都依赖本包。

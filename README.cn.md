@@ -2,8 +2,8 @@
 
 # NPS .NET 参考实现
 
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](../../LICENSE)
-[![Release](https://img.shields.io/badge/release-v1.0.0--alpha.18-orange.svg)](../../CHANGELOG.cn.md)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/badge/release-v1.0.0--alpha.18-orange.svg)](CHANGELOG.cn.md)
 [![NCP](https://img.shields.io/badge/NCP-v0.11-5b8cff.svg)]()
 [![NWP](https://img.shields.io/badge/NWP-v0.21-4af0b0.svg)]()
 [![NIP](https://img.shields.io/badge/NIP-v0.14-7b61ff.svg)]()
@@ -15,7 +15,7 @@ C# / .NET 10 Neural Protocol Suite 参考实现。
 ## Alpha.18 可移植 Profile
 
 本发布版实现五个共享协议 Profile，并执行
-[`spec/conformance`](../../spec/conformance/) 下的语言无关 fixture：
+[`spec/conformance`](spec/conformance/) 下的语言无关 fixture：
 
 - NCP 0.11 有界原生服务握手与确定性 Caps 协商。
 - NWP 0.21 可移植 Node/Bridge serving 与 Bridge 生命周期。

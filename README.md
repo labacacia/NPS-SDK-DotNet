@@ -2,8 +2,10 @@ English | [中文版](./README.cn.md)
 
 # NPS .NET Reference Implementation
 
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](../../LICENSE)
-[![Release](https://img.shields.io/badge/release-v1.0.0--alpha.18-orange.svg)](../../CHANGELOG.md)
+> First time here? Start with [START-HERE.md](START-HERE.md) for architecture, security, and review guidance.
+
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/badge/release-v1.0.0--alpha.18-orange.svg)](CHANGELOG.md)
 [![NCP](https://img.shields.io/badge/NCP-v0.11-5b8cff.svg)]()
 [![NWP](https://img.shields.io/badge/NWP-v0.21-4af0b0.svg)]()
 [![NIP](https://img.shields.io/badge/NIP-v0.14-7b61ff.svg)]()
@@ -15,7 +17,7 @@ C# / .NET 10 reference implementation for the Neural Protocol Suite.
 ## Alpha.18 portable profiles
 
 The release implements the five shared protocol profiles and executes the
-language-neutral fixtures under [`spec/conformance`](../../spec/conformance/):
+language-neutral fixtures under [`spec/conformance`](spec/conformance/):
 
 - NCP 0.11 bounded native-server handshake and deterministic Caps negotiation.
 - NWP 0.21 portable Node/Bridge serving and bridge lifecycle.

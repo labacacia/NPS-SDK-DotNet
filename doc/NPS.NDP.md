@@ -4,7 +4,7 @@ English | [中文版](./NPS.NDP.cn.md)
 
 > Root namespace: `NPS.NDP`
 > NuGet: `LabAcacia.NPS.NDP`
-> Spec: [NPS-4 NDP v0.8](https://github.com/labacacia/NPS-Release/blob/main/NPS-4-NDP.md)
+> Spec: [NPS-4 NDP v0.8](https://github.com/labacacia/NPS/blob/main/NPS-4-NDP.md)
 
 NDP is the discovery layer — the NPS analogue of DNS. This package provides the three NDP frame
 types, a thread-safe in-memory registry, an announce signature validator, and DI helpers.

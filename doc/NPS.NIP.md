@@ -4,7 +4,7 @@ English | [中文版](./NPS.NIP.cn.md)
 
 > Root namespace: `NPS.NIP`
 > NuGet: `LabAcacia.NPS.NIP`
-> Spec: [NPS-3 NIP v0.9](https://github.com/labacacia/NPS-Release/blob/main/NPS-3-NIP.md)
+> Spec: [NPS-3 NIP v0.9](https://github.com/labacacia/NPS/blob/main/NPS-3-NIP.md)
 
 NIP is the identity / PKI layer. The package covers:
 
