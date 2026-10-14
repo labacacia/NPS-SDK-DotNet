@@ -4,7 +4,7 @@ English | [中文版](./NPS.NWP.cn.md)
 
 > Root namespace: `NPS.NWP`
 > NuGet: `LabAcacia.NPS.NWP`
-> Spec: [NPS-2 NWP v0.15](https://github.com/labacacia/NPS-Release/blob/main/NPS-2-NWP.md)
+> Spec: [NPS-2 NWP v0.15](https://github.com/labacacia/NPS/blob/main/NPS-2-NWP.md)
 
 NWP is the HTTP overlay for NPS. This package provides:
 
