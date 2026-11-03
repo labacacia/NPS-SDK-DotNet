@@ -9,14 +9,14 @@
     <RootNamespace>NPS.NWP.Anchor</RootNamespace>
     <PackageId>LabAcacia.NPS.NWP.Anchor</PackageId>
     <AssemblyName>NPS.NWP.Anchor</AssemblyName>
-    <Version>1.0.0-alpha.19</Version>
+    <Version>1.0.0-alpha.20</Version>
     <Description>NPS — NWP Anchor Node: stateless AaaS entry point that translates inbound ActionFrames into NOP TaskFrames (NPS-AaaS §2).</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <Authors>LabAcacia / INNO LOTUS PTY LTD</Authors>
     <Company>INNO LOTUS PTY LTD</Company>
     <PackageTags>nps;nwp;nop;aaas;anchor;agent;protocol</PackageTags>
-    <PackageProjectUrl>https://github.com/labacacia/NPS-Dev</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/labacacia/NPS-Dev</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/labacacia/NPS</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/labacacia/NPS-SDK-DotNet</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.303" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

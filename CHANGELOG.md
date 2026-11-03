@@ -8,6 +8,34 @@ Until NPS reaches v1.0 stable, every repository in the suite is synchronized to 
 
 ---
 
+## [1.0.0-alpha.20] — Release candidate, unpublished
+
+- Bounded experimental result resources/authorization, repeated-schema batches, local task handoff and volatile node transfer. Language support differs; full six-SDK runtime parity is not qualified.
+- Preserve measured comparisons with equivalent HTTPgzip and ordinary tools; no universal token, fee or speed benefit is claimed.
+- Align candidate versions and local CI/package verification. Full production, beta and actual publication remain separate gates.
+
+## [Unreleased]
+
+- Update MessagePack to 3.1.9 and SQLite native bundles to 3.0.5; retain fixed wire vectors and source/publish-overlay alignment.
+
+- Add explicitly selected volatile issuer-pinned result discovery with current host ownership policy, conservative freshness/owner fences and generation/endpoint binding. This does not qualify durable registry or full production runtime.
+- Report locally invalid result descriptors as known no-dispatch; invalid received descriptors remain uncertain.
+
+## [1.0.0-alpha.19] — 2026-09-05
+
+### Added
+
+- Added the public `NPS.Core.Alpha19` policy surface and executable coverage for all 47 shared NCP/NWP/NIP/NDP/NOP hardening vectors, including negative and non-fixture boundary paths.
+
+### Changed
+
+- Expanded Node L2 to v0.7/38 cases with current AaaS L2-01..L2-07; L2-01..05
+  are required and L2-06/07 `na` results require a reasoned message.
+- Aligned Node L2 manifests to v0.6 and all 31 cases; validation now enforces
+  summary integrity, whole-family applicability and the single-/multi-Anchor
+  HA invariant.
+- Registered the alpha.19 protocol errors; the existing NativeAOT smoke remains green for the candidate.
+
 ## [1.0.0-alpha.18] — 2026-08-15
 
 ### Added

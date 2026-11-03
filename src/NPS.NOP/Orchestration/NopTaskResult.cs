@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using NPS.NOP.Models;
 
 namespace NPS.NOP.Orchestration;
@@ -11,10 +12,18 @@ namespace NPS.NOP.Orchestration;
 /// </summary>
 public sealed class NopTaskResult
 {
+    /// <summary>Final-only runtime certainty; null for unselected legacy or a duplicate still running.</summary>
+    [JsonPropertyName("execution_outcome")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ExecutionOutcome { get; init; }
+
     /// <summary>Task identifier from the original <c>TaskFrame.TaskId</c>.</summary>
     public required string TaskId { get; init; }
 
-    /// <summary>Terminal state: <see cref="TaskState.Completed"/>, <see cref="TaskState.Failed"/>, or <see cref="TaskState.Cancelled"/>.</summary>
+    /// <summary>
+    /// Terminal completed/failed/cancelled state. A selected-runtime duplicate which is
+    /// still executing returns Running with no terminal ExecutionOutcome; poll, do not redispatch.
+    /// </summary>
     public required TaskState FinalState { get; init; }
 
     /// <summary>

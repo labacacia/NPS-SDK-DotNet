@@ -3,6 +3,8 @@
 
 using System.Net.Sockets;
 using System.IO;
+using System.Net.Security;
+using NPS.Core.Alpha20;
 using NPS.Core.Codecs;
 using NPS.Core.Exceptions;
 using NPS.Core.Frames;
@@ -60,6 +62,21 @@ public sealed class NcpServerConnection : IAsyncDisposable
             throw new NcpHandshakeException(error, "Native NCP handshake negotiation failed.");
         }
 
+        IReadOnlyList<FeatureSelection> selected;
+        try
+        {
+            selected = NcpSchemaBatchNegotiation.Select(ClientHello, _profile.SchemaBatchesEnabled);
+            if (selected.Count != 0 && _stream is not SslStream { IsAuthenticated: true, IsMutuallyAuthenticated: true })
+                throw new NcpHandshakeException(NcpErrorCodes.FeatureRequiredUnsupported, "Schema batch reference requires verified mutual TLS.");
+        }
+        catch (NcpHandshakeException ex)
+        {
+            await RejectAsync(new ErrorFrame { Status = ex.ErrorCode == NcpErrorCodes.FeatureRequiredUnsupported
+                ? NpsStatusCodes.ClientConflict : NpsStatusCodes.ClientBadFrame,
+                Error = ex.ErrorCode, Message = "Native feature negotiation rejected." }, ct).ConfigureAwait(false);
+            throw;
+        }
+
         var defaultTier = negotiation.NegotiatedEncoding == "msgpack"
             ? EncodingTier.MsgPack
             : EncodingTier.Json;
@@ -70,6 +87,8 @@ public sealed class NcpServerConnection : IAsyncDisposable
                 StringComparer.Ordinal) == true);
         var caps = serverCaps with
         {
+            FeatureNegotiation = ClientHello.FeatureNegotiation is null ? null : 1,
+            SelectedFeatures = ClientHello.FeatureNegotiation is null ? null : NcpSchemaBatchNegotiation.SerializeSelection(selected),
             SessionVersion = negotiation.SessionVersion,
             NegotiatedEncoding = negotiation.NegotiatedEncoding,
             EnabledEncodings = negotiation.EnabledEncodings,
@@ -78,10 +97,21 @@ public sealed class NcpServerConnection : IAsyncDisposable
             ExtSupport = negotiation.ExtSupport,
             MaxConcurrentStreams = negotiation.MaxConcurrentStreams,
         };
-        var wire = _codec.Encode(caps, policy.DefaultTier);
+        byte[] wire;
+        try
+        {
+            wire = caps.FeatureNegotiation is null ? _codec.Encode(caps, policy.DefaultTier)
+                : NcpCanonicalWire.Encode(caps, policy.DefaultTier, Math.Min(16384U, caps.MaxFramePayload ?? 0));
+        }
+        catch (NpsException ex) when (caps.FeatureNegotiation is not null && ex.ProtocolErrorCode == NcpErrorCodes.FramePayloadTooLarge)
+        {
+            await RejectAsync(new ErrorFrame { Status = NpsStatusCodes.ClientBadFrame,
+                Error = NcpErrorCodes.FeatureNegotiationInvalid, Message = "Native feature response exceeds bound." }, ct).ConfigureAwait(false);
+            throw NcpSchemaBatchNegotiation.Invalid();
+        }
         await _stream.WriteAsync(wire, ct).ConfigureAwait(false);
         await _stream.FlushAsync(ct).ConfigureAwait(false);
-        return new NcpSession(_tcp, _stream, caps, policy);
+        return new NcpSession(_tcp, _stream, caps, policy, selected);
     }
 
     /// <summary>

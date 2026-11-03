@@ -9,14 +9,14 @@
     <RootNamespace>NPS.NDP</RootNamespace>
     <PackageId>LabAcacia.NPS.NDP</PackageId>
     <AssemblyName>NPS.NDP</AssemblyName>
-    <Version>1.0.0-alpha.19</Version>
+    <Version>1.0.0-alpha.20</Version>
     <Description>NPS — Neural Discovery Protocol library. Announce, resolve and graph-sync NWP nodes and Agents. Embeddable in any ASP.NET Core app.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <Authors>LabAcacia / INNO LOTUS PTY LTD</Authors>
     <Company>INNO LOTUS PTY LTD</Company>
     <PackageTags>nps;ndp;ai;agent;discovery;dns</PackageTags>
-    <PackageProjectUrl>https://github.com/labacacia/NPS-Dev</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/labacacia/NPS-Dev</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/labacacia/NPS</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/labacacia/NPS-SDK-DotNet</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.303" PrivateAssets="All" />
     <PackageReference Include="DnsClient" Version="1.8.0" />
     <PackageReference Include="NSec.Cryptography" Version="25.4.0" />
   </ItemGroup>

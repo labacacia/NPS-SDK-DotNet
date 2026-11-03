@@ -86,3 +86,12 @@ in-process with `TestServer` to keep the demo deterministically green in CI.
 - **Linear DAG.** The fixture is three nodes in a straight line. The NOP
   orchestrator and its existing test suite cover diamonds, K-of-N, retries,
   and condition skips separately.
+
+## Experimental result-reference composition
+
+The host may explicitly select the [bounded runtime path](../../src/NPS.NOP/Runtime/README.md).
+Its SQLite journal requires explicit first initialization and fail-closed reopen; it is
+not the legacy sample's default. Actual reference checks compose order/refund query,
+least-privilege analysis and five-row report through two authenticated data clients.
+Unknown effects stop downstream work; cancellation does not promise rollback.
+See the runtime page for commands, limits, ownership, unsupported paths and recovery.

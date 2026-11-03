@@ -132,28 +132,52 @@ public sealed class ActionNodeMiddleware
 
     // ── Static endpoints ─────────────────────────────────────────────────────
 
-    private Task HandleNwm(HttpContext ctx)
+    private async Task HandleNwm(HttpContext ctx)
     {
+        var json = _nwmJson;
+        if (_options.ManifestSource is { } source)
+        {
+            ActionNodeManifestSnapshot snapshot;
+            try { snapshot = source.Read(_options.NodeId); }
+            catch (ActionNodeException error)
+            {
+                await WriteError(ctx, error.HttpStatus, error.NpsStatus, error.ErrorCode, error.Message);
+                return;
+            }
+            var version = snapshot.Version.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            ctx.Response.Headers["X-NWM-Version"] = version;
+            if (ctx.Request.Headers.IfNoneMatch.ToString() == version)
+            {
+                ctx.Response.StatusCode = 304;
+                return;
+            }
+            json = snapshot.Json;
+        }
         ctx.Response.StatusCode = 200;
         ctx.Response.ContentType = NwpHttpHeaders.MimeManifest;
         ctx.Response.Headers[NwpHttpHeaders.NodeType] = "action";
-        return ctx.Response.WriteAsync(_nwmJson);
+        await ctx.Response.WriteAsync(json);
     }
 
-    private Task HandleSchema(HttpContext ctx)
+    private Task HandleSchema(HttpContext ctx) => HandleActions(ctx);
+
+    private async Task HandleActions(HttpContext ctx)
     {
         // Action Node does not own a row schema, but we still answer the conventional
         // /.schema route with the JSON action registry so tools can introspect.
+        var json = _actionsJson;
+        if (_options.ManifestSource is { } source)
+        {
+            try { json = JsonSerializer.Serialize(new { actions = source.Read(_options.NodeId).Manifest.Actions }, Json); }
+            catch (ActionNodeException error)
+            {
+                await WriteError(ctx, error.HttpStatus, error.NpsStatus, error.ErrorCode, error.Message);
+                return;
+            }
+        }
         ctx.Response.StatusCode = 200;
         ctx.Response.ContentType = "application/json";
-        return ctx.Response.WriteAsync(_actionsJson);
-    }
-
-    private Task HandleActions(HttpContext ctx)
-    {
-        ctx.Response.StatusCode = 200;
-        ctx.Response.ContentType = "application/json";
-        return ctx.Response.WriteAsync(_actionsJson);
+        await ctx.Response.WriteAsync(json);
     }
 
     // ── /invoke ──────────────────────────────────────────────────────────────
@@ -164,9 +188,15 @@ public sealed class ActionNodeMiddleware
 
         ActionFrame frame;
         ulong wireInputBytes;
+        JsonElement rawRequest;
         try
         {
-            (frame, wireInputBytes) = await ReadFrame<ActionFrame>(ctx);
+            (frame, wireInputBytes, rawRequest) = await ReadFrame<ActionFrame>(ctx);
+        }
+        catch (ActionNodeException ex)
+        {
+            await WriteError(ctx, ex.HttpStatus, ex.NpsStatus, ex.ErrorCode, ex.Message);
+            return;
         }
         catch (Exception ex)
         {
@@ -200,11 +230,12 @@ public sealed class ActionNodeMiddleware
         // Look up action spec
         if (!_options.Actions.TryGetValue(frame.ActionId, out var spec))
         {
-            NwpTelemetry.FrameErrors.Add(1, new TagList { { "frame_type", "action" }, { "error_code", NwpErrorCodes.ActionNotFound } });
-            activity?.SetStatus(ActivityStatusCode.Error, $"Unknown action_id '{frame.ActionId}'.");
-            await WriteError(ctx, 404, "NPS-CLIENT-NOT-FOUND",
-                NwpErrorCodes.ActionNotFound,
-                $"Unknown action_id '{frame.ActionId}'.");
+            var error = _provider.GetUnknownActionError(frame, ctx)
+                ?? new ActionNodeException(404, "NPS-CLIENT-NOT-FOUND", NwpErrorCodes.ActionNotFound,
+                    $"Unknown action_id '{frame.ActionId}'.");
+            NwpTelemetry.FrameErrors.Add(1, new TagList { { "frame_type", "action" }, { "error_code", error.ErrorCode } });
+            activity?.SetStatus(ActivityStatusCode.Error, error.Message);
+            await WriteError(ctx, error.HttpStatus, error.NpsStatus, error.ErrorCode, error.Message);
             return;
         }
 
@@ -249,6 +280,8 @@ public sealed class ActionNodeMiddleware
         var priority = frame.Priority ?? "normal";
         var actionContext = new ActionContext
         {
+            HttpContext = ctx,
+            HttpRequestBody = rawRequest,
             AgentNid = agentNid,
             RequestId = frame.RequestId,
             TaskId = null,
@@ -272,7 +305,7 @@ public sealed class ActionNodeMiddleware
         // provider/store's responsibility.
         var cacheActionId = ScopedCacheActionId(_options.NodeId, frame.ActionId, agentNid);
         var paramsHash = HashParams(frame.Params);
-        if (frame.IdempotencyKey is not null)
+        if (!_provider.ManagesIdempotency && frame.IdempotencyKey is not null)
         {
             var cached = _idempotency.Get(cacheActionId, frame.IdempotencyKey);
             if (cached is not null)
@@ -311,7 +344,7 @@ public sealed class ActionNodeMiddleware
             _taskStore.Create(taskId, frame.ActionId, frame.RequestId, agentNid);
 
             // Cache the task id so repeated idempotent async calls return the same handle.
-            if (frame.IdempotencyKey is not null)
+            if (!_provider.ManagesIdempotency && frame.IdempotencyKey is not null)
             {
                 _idempotency.TryStore(cacheActionId, frame.IdempotencyKey, new IdempotentEntry
                 {
@@ -393,7 +426,7 @@ public sealed class ActionNodeMiddleware
         {
             var completed = await WriteStream(
                 ctx, result.StreamFrames, frame.RequestId, cts.Token);
-            if (completed is not null && frame.IdempotencyKey is not null)
+            if (!_provider.ManagesIdempotency && completed is not null && frame.IdempotencyKey is not null)
             {
                 _idempotency.TryStore(cacheActionId, frame.IdempotencyKey, new IdempotentEntry
                 {
@@ -419,7 +452,7 @@ public sealed class ActionNodeMiddleware
             return;
         }
 
-        if (frame.IdempotencyKey is not null)
+        if (!_provider.ManagesIdempotency && frame.IdempotencyKey is not null)
         {
             _idempotency.TryStore(cacheActionId, frame.IdempotencyKey, new IdempotentEntry
             {
@@ -438,6 +471,8 @@ public sealed class ActionNodeMiddleware
         if (result.TokenEst > 0)
             NwpTelemetry.CgnConsumed.Add(result.TokenEst, new TagList { { "frame_type", "action" } });
 
+        if (result.SelectedFeatures is not null)
+            ctx.Response.Headers["X-NPS-Selected-Features"] = result.SelectedFeatures;
         await WriteCaps(ctx, result.Result, result.AnchorRef ?? spec.ResultAnchor,
             frame.RequestId, result.TokenEst);
     }
@@ -693,15 +728,24 @@ public sealed class ActionNodeMiddleware
         return v.ValueKind == JsonValueKind.String ? v.GetString() : null;
     }
 
-    private static async Task<(T frame, ulong wireInputBytes)> ReadFrame<T>(HttpContext ctx)
+    private async Task<(T frame, ulong wireInputBytes, JsonElement rawRequest)> ReadFrame<T>(HttpContext ctx)
     {
         using var ms = new MemoryStream();
-        await ctx.Request.Body.CopyToAsync(ms);
+        var buffer = new byte[8192];
+        int read;
+        while ((read = await ctx.Request.Body.ReadAsync(buffer, ctx.RequestAborted)) != 0)
+        {
+            if (_provider.MaxRequestBytes is { } max && ms.Length + read > max)
+                throw new ActionNodeException(413, "NPS-LIMIT-PAYLOAD",
+                    "NWP-HTTP-BODY-TOO-LARGE", "Action request exceeds the configured limit.");
+            ms.Write(buffer, 0, read);
+        }
         ms.Position = 0;
         var raw = ms.ToArray();
         var frame = JsonSerializer.Deserialize<T>(raw, Json)
             ?? throw new InvalidOperationException("Failed to deserialize frame.");
-        return (frame, (ulong)raw.LongLength);
+        using var document = JsonDocument.Parse(raw);
+        return (frame, (ulong)raw.LongLength, document.RootElement.Clone());
     }
 
     private Task WriteAsyncResponse(
@@ -751,7 +795,7 @@ public sealed class ActionNodeMiddleware
         return ctx.Response.WriteAsync(JsonSerializer.Serialize(caps, Json));
     }
 
-    private static Task WriteError(HttpContext ctx, int status, string npsStatus, string errorCode, string message)
+    private Task WriteError(HttpContext ctx, int status, string npsStatus, string errorCode, string message)
     {
         var err = new ErrorFrame
         {
@@ -760,7 +804,7 @@ public sealed class ActionNodeMiddleware
             Message = message,
         };
         ctx.Response.StatusCode = status;
-        ctx.Response.ContentType = "application/json";
+        ctx.Response.ContentType = _provider.ErrorMediaType;
         return ctx.Response.WriteAsync(JsonSerializer.Serialize(err, Json));
     }
 
@@ -774,6 +818,7 @@ public sealed class ActionNodeMiddleware
             NodeId = opt.NodeId,
             NodeType = "action",
             DisplayName = opt.DisplayName,
+            Actions = opt.Actions,
             WireFormats = ["ncp-capsule", "json"],
             PreferredFormat = "json",
             Capabilities = new NodeCapabilities
