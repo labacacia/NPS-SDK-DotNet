@@ -5,6 +5,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <!-- Execute the same measurement assertions directly when explicitly requested;
+         VSTest still discovers/runs this executable test assembly normally. -->
+    <GenerateProgramFile>false</GenerateProgramFile>
+    <StartupObject>NPS.Tests.Ncp.SchemaBatchCaptureProgram</StartupObject>
     <HasNpsDaemonSources Condition="Exists('..\..\..\..\tools\daemons\npsd\Npsd.csproj')">true</HasNpsDaemonSources>
     <HasNpsDaemonSources Condition="'$(HasNpsDaemonSources)' == ''">false</HasNpsDaemonSources>
     <NpsSuiteRoot Condition="Exists('..\..\..\..\spec\conformance\node-profile-case-inventory.json')">..\..\..\..</NpsSuiteRoot>

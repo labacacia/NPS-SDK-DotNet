@@ -30,6 +30,11 @@ namespace NPS.Core.Anchoring;
 /// (ASCII byte order = UTF-16 code-unit order for these ASCII-only keys).
 /// </para>
 /// </summary>
+/// <remarks>
+/// Unselected alpha.19 escaping is retained for compatibility. The optional schema-batch
+/// profile uses SchemaBatchFrameCodec.ComputeAnchorId for strict Unicode/HTML JCS strings.
+/// The historical public helper is not a general arbitrary-JSON canonicalizer.
+/// </remarks>
 public static class AnchorIdComputer
 {
     /// <summary>
@@ -48,7 +53,11 @@ public static class AnchorIdComputer
     /// Returns the RFC 8785 JCS canonical JSON string for <paramref name="schema"/>.
     /// Useful for debugging and cross-SDK verification.
     /// </summary>
-    public static string CanonicalJson(FrameSchema schema)
+    public static string CanonicalJson(FrameSchema schema) => CanonicalJson(schema, AppendJcsString);
+
+    // Optional profiles can supply the strict shared string primitive without
+    // changing the unselected alpha.19 helper's historical escaping behavior.
+    internal static string CanonicalJson(FrameSchema schema, Action<StringBuilder, string> appendString)
     {
         var sb = new StringBuilder();
 
@@ -58,7 +67,7 @@ public static class AnchorIdComputer
         for (int i = 0; i < schema.Fields.Count; i++)
         {
             if (i > 0) sb.Append(',');
-            AppendField(sb, schema.Fields[i]);
+            AppendField(sb, schema.Fields[i], appendString);
         }
 
         sb.Append("]}");
@@ -71,12 +80,12 @@ public static class AnchorIdComputer
     //   "semantic" (s=115 …)          — 's' > 'n'
     //   "type"     (t=116 …)          — 't' > 's'
     // "semantic" is omitted when null (matches WhenWritingNull serialiser behaviour).
-    private static void AppendField(StringBuilder sb, SchemaField field)
+    private static void AppendField(StringBuilder sb, SchemaField field, Action<StringBuilder, string> appendString)
     {
         sb.Append('{');
 
         sb.Append("\"name\":");
-        AppendJcsString(sb, field.Name);
+        appendString(sb, field.Name);
 
         sb.Append(",\"nullable\":");
         sb.Append(field.Nullable ? "true" : "false");
@@ -84,11 +93,11 @@ public static class AnchorIdComputer
         if (field.Semantic is not null)
         {
             sb.Append(",\"semantic\":");
-            AppendJcsString(sb, field.Semantic);
+            appendString(sb, field.Semantic);
         }
 
         sb.Append(",\"type\":");
-        AppendJcsString(sb, field.Type);
+        appendString(sb, field.Type);
 
         sb.Append('}');
     }

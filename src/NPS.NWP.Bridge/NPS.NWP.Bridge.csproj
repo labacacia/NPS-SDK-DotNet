@@ -9,14 +9,14 @@
     <RootNamespace>NPS.NWP.Bridge</RootNamespace>
     <PackageId>LabAcacia.NPS.NWP.Bridge</PackageId>
     <AssemblyName>NPS.NWP.Bridge</AssemblyName>
-    <Version>1.0.0-alpha.19</Version>
+    <Version>1.0.0-alpha.20</Version>
     <Description>NPS — NWP Bridge Node: stateless adapters between NPS frames and non-NPS protocols, bidirectional per NPS-CR-0010. Outbound HTTP/HTTPS, gRPC JSON unary, MCP JSON-RPC, and A2A JSON-RPC dispatchers; inbound MCP / A2A / gRPC servers over a pluggable INwpBackend (in-process or HTTP), with ASP.NET Core hosting. Absorbs LabAcacia.McpIngress, LabAcacia.A2aIngress, and LabAcacia.GrpcIngress.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <Authors>LabAcacia / INNO LOTUS PTY LTD</Authors>
     <Company>INNO LOTUS PTY LTD</Company>
     <PackageTags>nps;nwp;bridge;mcp;a2a;grpc;aspnetcore;agent;protocol</PackageTags>
-    <PackageProjectUrl>https://github.com/labacacia/NPS-Dev</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/labacacia/NPS-Dev</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/labacacia/NPS</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/labacacia/NPS-SDK-DotNet</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.303" PrivateAssets="All" />
     <!-- Inbound gRPC keeps the protobuf contract that LabAcacia.GrpcIngress published
          (Protos/nwp_ingress.proto); its clients use generated stubs, so the wire contract is
          public API and cannot be swapped for the hand-framed JSON the outbound dispatcher uses. -->

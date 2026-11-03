@@ -8,6 +8,9 @@ namespace NPS.NOP.Orchestration;
 /// </summary>
 public sealed class NopOrchestratorOptions
 {
+    /// <summary>Explicit host-authenticated bounded runtime path. Null preserves the legacy implementation.</summary>
+    public NPS.NOP.Runtime.NopRuntimeBinding? RuntimeBinding { get; set; }
+
     /// <summary>
     /// Maximum number of DAG nodes that may execute concurrently per task.
     /// Defaults to <see cref="Environment.ProcessorCount"/> × 2.

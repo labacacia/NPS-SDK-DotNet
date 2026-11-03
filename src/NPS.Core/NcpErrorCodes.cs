@@ -9,6 +9,10 @@ namespace NPS.Core;
 /// </summary>
 public static class NcpErrorCodes
 {
+    /// <summary>Alpha.20 profile error. Maps to NPS-CLIENT-BAD-FRAME; never implies safe retry.</summary>
+    public const string FeatureNegotiationInvalid = "NCP-FEATURE-NEGOTIATION-INVALID";
+    /// <summary>Alpha.20 profile error. Maps to NPS-CLIENT-CONFLICT; never implies safe retry.</summary>
+    public const string FeatureRequiredUnsupported = "NCP-FEATURE-REQUIRED-UNSUPPORTED";
     // ── Anchor errors ─────────────────────────────────────────────────────────
     /// <summary>anchor_ref references a Schema unknown to this Node. → NPS-CLIENT-NOT-FOUND</summary>
     public const string AnchorNotFound        = "NCP-ANCHOR-NOT-FOUND";

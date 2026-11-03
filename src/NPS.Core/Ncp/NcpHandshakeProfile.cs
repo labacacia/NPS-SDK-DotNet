@@ -12,6 +12,11 @@ namespace NPS.Core.Ncp;
 /// </summary>
 public sealed class NcpHandshakeProfile
 {
+    /// <summary>
+    /// Explicit experimental CR-0017 opt-in. Only enable after this host's actual
+    /// producer/source/binding qualification; default false and not inferred from version.
+    /// </summary>
+    public bool SchemaBatchesEnabled { get; init; }
     public string MinVersion { get; init; } = "0.1";
     public string NpsVersion { get; init; } = "0.11";
     public IReadOnlyList<string> SupportedEncodings { get; init; } =

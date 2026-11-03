@@ -12,7 +12,7 @@ namespace NPS.Core.Frames.Ncp;
 /// <summary>
 /// Schema anchor frame. Carries the full schema definition on first contact;
 /// subsequent messages reference it by <see cref="AnchorId"/> only (NPS-1 §4.1).
-/// <para>Typical token saving: 30–60 % per session.</para>
+/// <para>Schema reuse affects transport representation; provider token savings require separate measurement.</para>
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public sealed record AnchorFrame : IFrame
@@ -261,6 +261,18 @@ public sealed record HelloFrame : IFrame
     [IgnoreMember]
     public EncodingTier PreferredTier => EncodingTier.Json;
 
+    /// <summary>Optional exact feature negotiation version; no support is enabled by presence.</summary>
+    [JsonPropertyName("feature_negotiation")]
+    public uint? FeatureNegotiation { get; init; }
+
+    /// <summary>Bounded raw CR-0012 offer; validated before accepting an experimental session.</summary>
+    [JsonPropertyName("feature_offer")]
+    public JsonElement? FeatureOffer { get; init; }
+
+    /// <summary>Offered feature IDs whose absence must reject this handshake.</summary>
+    [JsonPropertyName("required_features")]
+    public IReadOnlyList<string>? RequiredFeatures { get; init; }
+
     /// <summary>Highest NPS version the client supports, e.g. <c>"0.4"</c>.</summary>
     [JsonPropertyName("nps_version")]
     public required string NpsVersion { get; init; }
@@ -358,6 +370,14 @@ public sealed record NcpHandshakeCapsFrame : IFrame
     public FrameType FrameType => FrameType.Caps;
     [IgnoreMember]
     public EncodingTier PreferredTier => EncodingTier.Json;
+
+    /// <summary>CR-0012 acknowledgment, scoped to this handshake only.</summary>
+    [JsonPropertyName("feature_negotiation")]
+    public uint? FeatureNegotiation { get; init; }
+
+    /// <summary>Exact admitted feature selections; never renegotiated through application Caps.</summary>
+    [JsonPropertyName("selected_features")]
+    public JsonElement? SelectedFeatures { get; init; }
 
     /// <summary>The server's NID in <c>urn:nps:agent:{domain}:{id}</c> format.</summary>
     [JsonPropertyName("node_id")]

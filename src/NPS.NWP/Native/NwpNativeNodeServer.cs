@@ -18,6 +18,8 @@ namespace NPS.NWP.Native;
 /// Host-independent native-mode NWP serving loop over an established NCP session.
 /// Supports Memory Node <see cref="QueryFrame"/> and Action Node <see cref="ActionFrame"/>
 /// dispatch without requiring ASP.NET middleware.
+/// Actions pass provider authorization before execution. The host owns authenticated
+/// transport and any claimed NIP/session binding; this server creates no identity proof.
 /// </summary>
 public sealed class NwpNativeNodeServer
 {
@@ -60,6 +62,10 @@ public sealed class NwpNativeNodeServer
             catch (EndOfStreamException)
             {
                 return;
+            }
+            catch (ActionNodeException ex)
+            {
+                response = new ErrorFrame { Status = ex.NpsStatus, Error = ex.ErrorCode, Message = ex.Message };
             }
             catch (NpsFrameException ex)
             {
@@ -144,18 +150,17 @@ public sealed class NwpNativeNodeServer
             : Math.Min(frame.TimeoutMs, Math.Min(spec.TimeoutMsMax ?? actionOptions.MaxTimeoutMs,
                 actionOptions.MaxTimeoutMs));
 
-        var result = await _actionProvider.ExecuteAsync(
-            frame,
-            new ActionContext
-            {
-                AgentNid = null,
-                RequestId = frame.RequestId,
-                Spec = spec,
-                TimeoutMs = timeout,
-                Priority = string.IsNullOrWhiteSpace(frame.Priority) ? "normal" : frame.Priority!,
-                WireInputBytes = wireInputBytes,
-            },
-            ct).ConfigureAwait(false);
+        var context = new ActionContext
+        {
+            AgentNid = null,
+            RequestId = frame.RequestId,
+            Spec = spec,
+            TimeoutMs = timeout,
+            Priority = string.IsNullOrWhiteSpace(frame.Priority) ? "normal" : frame.Priority!,
+            WireInputBytes = wireInputBytes,
+        };
+        await _actionProvider.AuthorizeAsync(frame, context, ct).ConfigureAwait(false);
+        var result = await _actionProvider.ExecuteAsync(frame, context, ct).ConfigureAwait(false);
 
         return new CapsFrame
         {

@@ -9,14 +9,14 @@
     <RootNamespace>NPS.NIP</RootNamespace>
     <PackageId>LabAcacia.NPS.NIP</PackageId>
     <AssemblyName>NPS.NIP</AssemblyName>
-    <Version>1.0.0-alpha.19</Version>
+    <Version>1.0.0-alpha.20</Version>
     <Description>NPS — Neural Identity Protocol CA Server library. Issues, renews, revokes, and verifies NID certificates (Ed25519). Embeddable in any ASP.NET Core app or deployed standalone via Docker.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <Authors>LabAcacia / INNO LOTUS PTY LTD</Authors>
     <Company>INNO LOTUS PTY LTD</Company>
     <PackageTags>nps;nip;ai;agent;identity;ca;certificate;ed25519</PackageTags>
-    <PackageProjectUrl>https://github.com/labacacia/NPS-Dev</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/labacacia/NPS-Dev</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/labacacia/NPS</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/labacacia/NPS-SDK-DotNet</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.303" PrivateAssets="All" />
     <PackageReference Include="NSec.Cryptography" Version="25.4.0" />
   </ItemGroup>
 

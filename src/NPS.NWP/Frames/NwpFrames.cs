@@ -105,13 +105,17 @@ public sealed record VectorSearchOptions
 public sealed record ActionFrame : IFrame
 {
     [IgnoreMember]
+    [JsonIgnore]
     public FrameType FrameType => FrameType.Action;
     [IgnoreMember]
+    [JsonIgnore]
     public EncodingTier PreferredTier => EncodingTier.MsgPack;
 
     /// <summary>
     /// Operation identifier in <c>{domain}.{verb}</c> format, e.g. <c>"orders.create"</c>.
-    /// Unknown action_id MUST result in <c>NWP-ACTION-NOT-FOUND</c>.
+    /// Base actions use <c>NWP-ACTION-NOT-FOUND</c> for an unknown identifier.
+    /// A selected profile may require its own bounded validation error, such as the
+    /// data-result profile's <c>NWP-ACTION-PARAMS-INVALID</c> for unsupported operations.
     /// </summary>
     [JsonPropertyName("action_id")]
     public required string ActionId { get; init; }
@@ -124,7 +128,9 @@ public sealed record ActionFrame : IFrame
 
     /// <summary>
     /// UUID v4 idempotency key. Repeated requests with the same key within 24 hours
-    /// MUST return the original result without re-executing the action (NPS-2 §6.1).
+    /// MUST return the original result without re-executing the action for the base
+    /// action contract (NPS-2 §6.1). Selected profiles define their own scope/retention;
+    /// data-result creation binds owner and digest for the process-local result TTL.
     /// </summary>
     [JsonPropertyName("idempotency_key")]
     public string? IdempotencyKey { get; init; }

@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using NPS.Core.Alpha20;
 using NPS.Core.Codecs;
 using NPS.Core.Exceptions;
 using NPS.Core.Frames;
@@ -100,6 +101,15 @@ public sealed class NcpServer : IAsyncDisposable
             // 3 — read payload and deserialise HelloFrame
             var payload = new byte[header.PayloadLength];
             await stream.ReadExactlyAsync(payload, helloCt).ConfigureAwait(false);
+
+            try { NcpSchemaBatchNegotiation.ValidateRawHello(payload); }
+            catch (Exception ex) when (ex is FeatureFormatException or NcpHandshakeException)
+            {
+                var wire = _codec.Encode(new ErrorFrame { Status = NpsStatusCodes.ClientBadFrame,
+                    Error = NcpErrorCodes.FeatureNegotiationInvalid, Message = "Native feature negotiation rejected." }, EncodingTier.Json);
+                await stream.WriteAsync(wire, helloCt).ConfigureAwait(false);
+                throw NcpSchemaBatchNegotiation.Invalid();
+            }
 
             var hello = JsonSerializer.Deserialize<HelloFrame>(payload, JsonOpts)
                         ?? throw new NpsFrameException("HelloFrame payload deserialised to null.");

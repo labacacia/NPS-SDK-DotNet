@@ -74,4 +74,11 @@ public sealed class ActionNodeOptions
     /// standard LLM actions such as <c>llm.complete</c>.
     /// </summary>
     public NwmLlmProfile? LlmProfile { get; set; }
+
+    /// <summary>
+    /// Optional explicit host-owned manifest source. Use only after the advertised route's
+    /// bindings/all backends qualify; this does not enable a provider. The host owns persisted
+    /// monotonic revisions across restart and atomically updates offers with admission policy.
+    /// </summary>
+    public ActionNodeManifestSource? ManifestSource { get; set; }
 }

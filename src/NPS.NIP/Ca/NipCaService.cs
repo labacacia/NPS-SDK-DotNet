@@ -855,6 +855,18 @@ public sealed class NipCaException : Exception
 /// <summary>NIP error codes (NPS-3 §9).</summary>
 public static class NipErrorCodes
 {
+    /// <summary>Alpha.20 profile error. Maps to NPS-CLIENT-BAD-FRAME; never implies safe retry.</summary>
+    public const string ContextInvalid = "NIP-CONTEXT-INVALID";
+    /// <summary>Alpha.20 profile error. Maps to NPS-AUTH-FORBIDDEN; never implies safe retry.</summary>
+    public const string ContextUntrusted = "NIP-CONTEXT-UNTRUSTED";
+    /// <summary>Alpha.20 profile error. Maps to NPS-AUTH-FORBIDDEN; never implies safe retry.</summary>
+    public const string ContextBindingMismatch = "NIP-CONTEXT-BINDING-MISMATCH";
+    /// <summary>Alpha.20 profile error. Maps to NPS-AUTH-FORBIDDEN; never implies safe retry.</summary>
+    public const string ContextExpired = "NIP-CONTEXT-EXPIRED";
+    /// <summary>Alpha.20 profile error. Maps to NPS-CLIENT-CONFLICT; never implies safe retry.</summary>
+    public const string ContextReplay = "NIP-CONTEXT-REPLAY";
+    /// <summary>Alpha.20 profile error. Maps to NPS-SERVER-UNAVAILABLE; never implies safe retry.</summary>
+    public const string ContextVerifierUnavailable = "NIP-CONTEXT-VERIFIER-UNAVAILABLE";
     public const string CertExpired      = "NIP-CERT-EXPIRED";
     public const string CertRevoked      = "NIP-CERT-REVOKED";
     public const string CertSigInvalid   = "NIP-CERT-SIGNATURE-INVALID";

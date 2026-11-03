@@ -10,7 +10,7 @@ public enum EncodingTier : byte
 {
     /// <summary>Tier-1: UTF-8 JSON. Human-readable; used in development and compatibility mode.</summary>
     Json    = 0x00,
-    /// <summary>Tier-2: MessagePack binary. ~60 % size reduction vs JSON; default for production.</summary>
+    /// <summary>Tier-2: MessagePack binary. Relative size depends on data/framing and needs measurement.</summary>
     MsgPack = 0x01,
     /// <summary>Tier-3: BinaryVector v1. MessagePack metadata plus little-endian float32 vector segments.</summary>
     BinaryVector = 0x02,

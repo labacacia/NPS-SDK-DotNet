@@ -113,6 +113,22 @@ public static class NwpHttpHeaders
 /// </summary>
 public static class NwpErrorCodes
 {
+    /// <summary>Alpha.20 profile error. Maps to NPS-CLIENT-BAD-FRAME; never implies safe retry.</summary>
+    public const string ChallengeInvalid = "NWP-CHALLENGE-INVALID";
+    /// <summary>Alpha.20 profile error. Maps to NPS-CLIENT-NOT-FOUND; never implies safe retry.</summary>
+    public const string ChallengeNotFound = "NWP-CHALLENGE-NOT-FOUND";
+    /// <summary>Alpha.20 profile error. Maps to NPS-CLIENT-CONFLICT; never implies safe retry.</summary>
+    public const string ChallengeBindingConflict = "NWP-CHALLENGE-BINDING-CONFLICT";
+    /// <summary>Alpha.20 profile error. Maps to NPS-CLIENT-CONFLICT; never implies safe retry.</summary>
+    public const string ChallengeNotApproved = "NWP-CHALLENGE-NOT-APPROVED";
+    /// <summary>Alpha.20 profile error. Maps to NPS-CLIENT-CONFLICT; never implies safe retry.</summary>
+    public const string ChallengeExpired = "NWP-CHALLENGE-EXPIRED";
+    /// <summary>Alpha.20 profile error. Maps to NPS-SERVER-UNAVAILABLE; never implies safe retry.</summary>
+    public const string ChallengeStateUnavailable = "NWP-CHALLENGE-STATE-UNAVAILABLE";
+    /// <summary>Alpha.20 profile error. Maps to NPS-CLIENT-BAD-FRAME; never implies safe retry.</summary>
+    public const string FeatureRequirementsInvalid = "NWP-FEATURE-REQUIREMENTS-INVALID";
+    /// <summary>Alpha.20 profile error. Maps to NPS-CLIENT-CONFLICT; never implies safe retry.</summary>
+    public const string FeatureRequiredUnsupported = "NWP-FEATURE-REQUIRED-UNSUPPORTED";
     // Auth
     public const string AuthNidScopeViolation = "NWP-AUTH-NID-SCOPE-VIOLATION";
     public const string AuthNidExpired = "NWP-AUTH-NID-EXPIRED";

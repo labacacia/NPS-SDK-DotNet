@@ -12,6 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.10" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
     <ProjectReference Include="..\..\src\NPS.Core\NPS.Core.csproj" />
     <ProjectReference Include="..\..\src\NPS.NWP\NPS.NWP.csproj" />
     <ProjectReference Include="..\..\src\NPS.NOP\NPS.NOP.csproj" />

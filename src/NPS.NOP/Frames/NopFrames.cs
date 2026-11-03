@@ -211,6 +211,12 @@ public sealed record SyncFrame : IFrame
 /// </summary>
 public sealed record AlignStreamFrame : IFrame
 {
+    /// <summary>Final-only certainty in an explicitly selected runtime binding; absent in legacy frames.</summary>
+    [JsonPropertyName("execution_outcome")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [MessagePack.IgnoreMember] // Preserve the unselected contractless compatibility fallback; runtime native binding is unqualified.
+    public string? ExecutionOutcome { get; init; }
+
     public FrameType    FrameType     => FrameType.AlignStream;
     public EncodingTier PreferredTier => EncodingTier.MsgPack;
 

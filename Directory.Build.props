@@ -1,8 +1,8 @@
 <Project>
 
   <PropertyGroup>
-    <Version>1.0.0-alpha.19</Version>
-    <PackageReleaseNotes>1.0.0-alpha.19: closes NCP/NWP/NIP/NDP/NOP runtime hardening gaps; executes 47 shared conformance vectors; aligns Node profile evidence, six-SDK parity, and release-readiness gates.</PackageReleaseNotes>
+    <Version>1.0.0-alpha.20</Version>
+    <PackageReleaseNotes>1.0.0-alpha.20 candidate: opt-in bounded data workflows, result authorization and honest transport/model measurements. Reference paths and SDK helper coverage differ; full production parity and beta are not qualified. Not yet published.</PackageReleaseNotes>
     <!-- XML documentation files are generated, but the alpha SDK still has broad
          public-surface doc gaps; keep compile output clean until the doc sweep. -->
     <NoWarn>$(NoWarn);CS1591;CS1573;CS1574;CS1734</NoWarn>
