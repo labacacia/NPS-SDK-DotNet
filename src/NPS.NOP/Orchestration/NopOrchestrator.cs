@@ -20,6 +20,7 @@ namespace NPS.NOP.Orchestration;
 /// </summary>
 public sealed class NopOrchestrator : INopOrchestrator
 {
+    private readonly NPS.NOP.Runtime.NopRuntimeExecutor? _runtime;
     private readonly INopWorkerClient        _worker;
     private readonly INopTaskStore           _store;
     private readonly NopOrchestratorOptions  _opts;
@@ -37,6 +38,7 @@ public sealed class NopOrchestrator : INopOrchestrator
         ILogger<NopOrchestrator>? log         = null,
         IHttpClientFactory?       httpFactory = null)
     {
+        _runtime = opts?.RuntimeBinding is { } binding ? new(binding) : null;
         _worker      = worker;
         _store       = store;
         _opts        = opts ?? new NopOrchestratorOptions();
@@ -49,6 +51,7 @@ public sealed class NopOrchestrator : INopOrchestrator
     /// <inheritdoc/>
     public async Task<NopTaskResult> ExecuteAsync(TaskFrame task, CancellationToken ct = default)
     {
+        if (_runtime is not null) return await _runtime.ExecuteAsync(task, ct);
         using var activity = NopTelemetry.Source.StartActivity(
             "nps.nop.task.execute", ActivityKind.Server, ExtractTaskContext(task.Context));
         activity?.SetTag("nps.task.id",         task.TaskId);
@@ -180,6 +183,7 @@ public sealed class NopOrchestrator : INopOrchestrator
     /// <inheritdoc/>
     public async Task CancelAsync(string taskId, CancellationToken ct = default)
     {
+        if (_runtime is not null) { await _runtime.CancelAsync(taskId, ct); return; }
         await _ctsLock.WaitAsync(ct);
         try
         {
@@ -193,7 +197,7 @@ public sealed class NopOrchestrator : INopOrchestrator
 
     /// <inheritdoc/>
     public Task<NopTaskRecord?> GetStatusAsync(string taskId, CancellationToken ct = default)
-        => _store.GetAsync(taskId, ct);
+        => _runtime is not null ? Task.FromResult(_runtime.GetStatus(taskId)) : _store.GetAsync(taskId, ct);
 
     // ── DAG execution ─────────────────────────────────────────────────────────
 

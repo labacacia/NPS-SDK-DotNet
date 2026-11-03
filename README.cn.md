@@ -2,8 +2,11 @@
 
 # NPS .NET 参考实现
 
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](../../LICENSE)
-[![Release](https://img.shields.io/badge/release-v1.0.0--alpha.18-orange.svg)](../../CHANGELOG.cn.md)
+> alpha.20 发布候选，尚未发布。六SDK辅助契约与实际运行路径分开；完整生产/跨SDK运行时一致性未获资格。
+
+
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/labacacia/NPS/blob/main/LICENSE)
+[![Release](https://img.shields.io/badge/candidate-v1.0.0--alpha.20-orange.svg)](../../CHANGELOG.cn.md)
 [![NCP](https://img.shields.io/badge/NCP-v0.11-5b8cff.svg)]()
 [![NWP](https://img.shields.io/badge/NWP-v0.21-4af0b0.svg)]()
 [![NIP](https://img.shields.io/badge/NIP-v0.14-7b61ff.svg)]()
@@ -15,7 +18,7 @@ C# / .NET 10 Neural Protocol Suite 参考实现。
 ## Alpha.18 可移植 Profile
 
 本发布版实现五个共享协议 Profile，并执行
-[`spec/conformance`](../../spec/conformance/) 下的语言无关 fixture：
+[`spec/conformance`](https://github.com/labacacia/NPS/blob/prep/alpha20-release-candidate/spec/conformance/) 下的语言无关 fixture：
 
 - NCP 0.11 有界原生服务握手与确定性 Caps 协商。
 - NWP 0.21 可移植 Node/Bridge serving 与 Bridge 生命周期。
@@ -319,3 +322,5 @@ dotnet test
 积极开发中（v1.0.0-alpha.19）。865 个 standalone SDK 测试全部通过。
 
 Alpha.15 主要内容：官方 `llm.complete` Action/Caps/Stream DTO contract；面向 `CapsFrame`、`StreamFrame`、异步 task result、`ErrorFrame.Details` 的 typed frame payload helper；Bridge `bridge_target` 规范 wire shape 统一到 `extras`；warning-clean .NET 包族与 SourceLink symbol；native NCP TLS hook 与有界 Hello 读取；live NIP revocation check 与 signed CRL artifact；`NipCaClient`；`NwpNativeNodeServer`；内置 HTTP/HTTPS、gRPC JSON unary、MCP JSON-RPC、A2A JSON-RPC Bridge dispatcher；transport-neutral observability renderer；`LabAcacia.NPS.Conformance`；loopback dev stack。
+
+[显式启用的易失结果发现：当前宿主授权、签名公告、路由/结果绑定及故障切换边界。](src/NPS.NDP/Discovery/README.cn.md)

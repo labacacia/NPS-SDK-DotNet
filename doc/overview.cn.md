@@ -165,7 +165,7 @@ app.Run();
 
 ## 7. 后续阅读
 
-- 初识 NPS？先读 [`spec/NPS-0-Overview.cn.md`](https://github.com/labacacia/NPS-Release/blob/main/NPS-0-Overview.cn.md)
+- 初识 NPS？先读 [`spec/NPS-0-Overview.cn.md`](https://github.com/labacacia/NPS/blob/main/NPS-0-Overview.cn.md)
   以理解协议套件存在的原因。
 - 要构建 Memory Node？参见 [NPS.NWP.cn.md](./NPS.NWP.cn.md#memory-node-%E4%B8%AD%E9%97%B4%E4%BB%B6)。
 - 要运行 CA？参见 [NPS.NIP.cn.md](./NPS.NIP.cn.md#nipcaservice)。

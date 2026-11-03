@@ -8,6 +8,8 @@ namespace NPS.NOP;
 /// </summary>
 public static class NopErrorCodes
 {
+    /// <summary>Alpha.20 profile error. Maps to NPS-SERVER-INTERNAL; never implies safe retry.</summary>
+    public const string ExecutionIndeterminate = "NOP-EXECUTION-INDETERMINATE";
     public const string TaskNotFound = "NOP-TASK-NOT-FOUND";
     public const string TaskTimeout = "NOP-TASK-TIMEOUT";
     public const string TaskDagInvalid = "NOP-TASK-DAG-INVALID";

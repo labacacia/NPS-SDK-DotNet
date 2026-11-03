@@ -200,7 +200,12 @@ public sealed class NcpHandshakeException : NpsException
 
     public NcpHandshakeException(string errorCode, string? message)
         : base(message ?? $"NCP handshake failed: {errorCode}",
-               NpsStatusCodes.ProtoVersionIncompatible, errorCode)
+               errorCode switch
+               {
+                   NcpErrorCodes.FeatureNegotiationInvalid => NpsStatusCodes.ClientBadFrame,
+                   NcpErrorCodes.FeatureRequiredUnsupported => NpsStatusCodes.ClientConflict,
+                   _ => NpsStatusCodes.ProtoVersionIncompatible,
+               }, errorCode)
     {
         ErrorCode = errorCode;
     }

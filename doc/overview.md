@@ -169,7 +169,7 @@ See [NPS.Core.md §`FrameHeader`](./NPS.Core.md#frameheader) for the exact layou
 
 ## 7. Where to go next
 
-- New to NPS? Read [`spec/NPS-0-Overview.md`](https://github.com/labacacia/NPS-Release/blob/main/NPS-0-Overview.md)
+- New to NPS? Read [`spec/NPS-0-Overview.md`](https://github.com/labacacia/NPS/blob/main/NPS-0-Overview.md)
   first to understand why the protocol suite exists.
 - Building a Memory Node? See [NPS.NWP.md](./NPS.NWP.md#memory-node-middleware).
 - Running a CA? See [NPS.NIP.md](./NPS.NIP.md#nipcaservice).

@@ -21,6 +21,9 @@ public sealed class NpsFrameCodec
     private readonly FrameRegistry _registry;
     private readonly uint _maxPayload;
 
+    /// <summary>Local payload ceiling, also enforced before transport-side allocation.</summary>
+    public uint MaxPayload => _maxPayload;
+
     public NpsFrameCodec(
         Tier1JsonCodec json,
         Tier2MsgPackCodec msgpack,

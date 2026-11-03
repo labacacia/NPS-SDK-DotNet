@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 using NPS.Core;
 using NPS.Core.Frames.Ncp;
 using NPS.NWP.Frames;
@@ -14,6 +15,8 @@ namespace NPS.NWP.ActionNode;
 /// </summary>
 public sealed class ActionExecutionResult
 {
+    /// <summary>Exact feature pairs admitted by the provider; emitted only on HTTP success.</summary>
+    public string? SelectedFeatures { get; init; }
     /// <summary>
     /// Action output. Serialised into <c>CapsFrame.Data</c> (single element) for the
     /// response. <c>null</c> is allowed for side-effecting actions with no return payload.
@@ -43,6 +46,15 @@ public sealed class ActionExecutionResult
 /// </summary>
 public sealed class ActionContext
 {
+    /// <summary>
+    /// Current HTTP host context, absent on native/background calls. Its User is trustworthy
+    /// only after deployment authentication; request headers alone never prove identity.
+    /// Providers must not retain the context beyond the request lifetime.
+    /// </summary>
+    public HttpContext? HttpContext { get; init; }
+
+    /// <summary>Original parsed JSON request, preserving field presence for binding verification.</summary>
+    public JsonElement? HttpRequestBody { get; init; }
     /// <summary>NID of the calling agent from <c>X-NWP-Agent</c> header, or <c>null</c>.</summary>
     public required string? AgentNid { get; init; }
 
@@ -104,8 +116,28 @@ public sealed class ActionNodeException : Exception
 public interface IActionNodeProvider
 {
     /// <summary>
-    /// Authorize and validate an action before the middleware consults its
-    /// idempotency cache. Stateful providers use this hook to re-check NIP
+    /// True only when this provider owns all replay validation, expiry and storage.
+    /// The middleware then bypasses its generic cache on every operation.
+    /// </summary>
+    bool ManagesIdempotency => false;
+
+    /// <summary>Optional finite JSON request limit, enforced before deserialization.</summary>
+    int? MaxRequestBytes => null;
+
+    /// <summary>Error envelope media type; legacy providers retain their existing JSON binding.</summary>
+    string ErrorMediaType => "application/json";
+
+    /// <summary>
+    /// Optional profile error for an unregistered action, before authorization or
+    /// execution. Implementations may validate feature admission but must not execute
+    /// actions or consume authority. Null preserves the legacy action-not-found error.
+    /// </summary>
+    ActionNodeException? GetUnknownActionError(ActionFrame frame, HttpContext context) => null;
+
+    /// <summary>
+    /// Authorize and validate an action before HTTP cache lookup or native execution.
+    /// Both serving paths invoke this hook; an authenticated native transport alone
+    /// does not grant operation/resource authority. Stateful providers re-check NIP
     /// authorization before returning a cached result.
     /// </summary>
     Task AuthorizeAsync(

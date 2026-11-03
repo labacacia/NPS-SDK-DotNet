@@ -4,7 +4,7 @@
 
 > 根命名空间：`NPS.NWP`
 > NuGet：`LabAcacia.NPS.NWP`
-> 规范：[NPS-2 NWP v0.15](https://github.com/labacacia/NPS-Release/blob/main/NPS-2-NWP.md)
+> 规范：[NPS-2 NWP v0.15](https://github.com/labacacia/NPS/blob/main/NPS-2-NWP.md)
 
 NWP 是 NPS 的 HTTP 覆盖层。本包提供：
 

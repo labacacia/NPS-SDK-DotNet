@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Text.Json.Serialization;
+using System.Text.Json;
+using NPS.NWP.ActionNode;
 using NPS.NWP.Llm;
 
 namespace NPS.NWP.Nwm;
@@ -13,6 +15,19 @@ namespace NPS.NWP.Nwm;
 /// </summary>
 public sealed record NeuralWebManifest
 {
+    /// <summary>Host-owned monotonic structural revision; required for a feature-aware route.</summary>
+    [JsonPropertyName("manifest_version")]
+    public uint? ManifestVersion { get; init; }
+
+    /// <summary>UTC timestamp of the last structural change, paired with the revision.</summary>
+    [JsonPropertyName("manifest_updated_at")]
+    public string? ManifestUpdatedAt { get; init; }
+
+    /// <summary>Callable operation registry for Action/Complex routes (NWP §4.6).</summary>
+    public IReadOnlyDictionary<string, ActionSpec>? Actions { get; init; }
+
+    /// <summary>Declared endpoint lifecycle; feature-dependent reference routes use experimental.</summary>
+    public string? Stability { get; init; }
     /// <summary>NWP version. Current value: <c>"0.2"</c>.</summary>
     public required string Nwp { get; init; }
 
@@ -121,6 +136,9 @@ public sealed record NwmTokenBudget
 /// </summary>
 public sealed record NwmProfiles
 {
+    /// <summary>Existing NWP §9.6 version-1 feature offer, at most 16384 UTF-8 bytes.</summary>
+    [JsonPropertyName("feature_negotiation")]
+    public JsonElement? FeatureNegotiation { get; init; }
     /// <summary>
     /// LLM/Thinking profile. Present only on Action or Complex nodes that expose
     /// standard LLM actions such as <c>llm.complete</c>.

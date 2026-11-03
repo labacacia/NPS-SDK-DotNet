@@ -2,8 +2,12 @@ English | [中文版](./README.cn.md)
 
 # NPS .NET Reference Implementation
 
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](../../LICENSE)
-[![Release](https://img.shields.io/badge/release-v1.0.0--alpha.18-orange.svg)](../../CHANGELOG.md)
+> alpha.20 candidate, unpublished. Six-SDK helper contracts and qualified runtime
+> paths differ; full production/cross-SDK runtime parity is not qualified.
+
+
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/labacacia/NPS/blob/main/LICENSE)
+[![Release](https://img.shields.io/badge/candidate-v1.0.0--alpha.20-orange.svg)](CHANGELOG.md)
 [![NCP](https://img.shields.io/badge/NCP-v0.11-5b8cff.svg)]()
 [![NWP](https://img.shields.io/badge/NWP-v0.21-4af0b0.svg)]()
 [![NIP](https://img.shields.io/badge/NIP-v0.14-7b61ff.svg)]()
@@ -15,7 +19,7 @@ C# / .NET 10 reference implementation for the Neural Protocol Suite.
 ## Alpha.18 portable profiles
 
 The release implements the five shared protocol profiles and executes the
-language-neutral fixtures under [`spec/conformance`](../../spec/conformance/):
+language-neutral fixtures under [`spec/conformance`](https://github.com/labacacia/NPS/blob/prep/alpha20-release-candidate/spec/conformance/):
 
 - NCP 0.11 bounded native-server handshake and deterministic Caps negotiation.
 - NWP 0.21 portable Node/Bridge serving and bridge lifecycle.
@@ -330,3 +334,5 @@ dotnet test
 Active development (v1.0.0-alpha.19). 865 standalone SDK tests passing.
 
 Alpha.15 highlights: official `llm.complete` Action/Caps/Stream DTO contracts; typed frame payload helpers for `CapsFrame`, `StreamFrame`, async task results, and `ErrorFrame.Details`; Bridge `bridge_target` canonical wire shape aligned on `extras`; warning-clean .NET package family with SourceLink symbols; native NCP TLS hook and bounded Hello reads; live NIP revocation checks and signed CRL artifacts; `NipCaClient`; `NwpNativeNodeServer`; built-in Bridge dispatchers for HTTP/HTTPS, gRPC JSON unary, MCP JSON-RPC, and A2A JSON-RPC; transport-neutral observability renderers; `LabAcacia.NPS.Conformance`; loopback dev stack.
+
+[Opt-in volatile result discovery: current host ownership, signed announcements, route/result binding and explicit failover limits.](src/NPS.NDP/Discovery/README.md)

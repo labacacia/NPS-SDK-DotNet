@@ -17,7 +17,7 @@ using NPS.NWP.Native;
 
 namespace NPS.Tests.Nwp;
 
-public sealed class NwpNativeNodeServerTests
+public sealed partial class NwpNativeNodeServerTests
 {
     [Fact]
     public async Task DispatchQuery_UsesMemoryProvider()

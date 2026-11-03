@@ -4,7 +4,7 @@ English | [中文版](./NPS.NOP.cn.md)
 
 > Root namespace: `NPS.NOP`
 > NuGet: `LabAcacia.NPS.NOP`
-> Spec: [NPS-5 NOP v0.6](https://github.com/labacacia/NPS-Release/blob/main/NPS-5-NOP.md)
+> Spec: [NPS-5 NOP v0.6](https://github.com/labacacia/NPS/blob/main/NPS-5-NOP.md)
 
 NOP is the orchestration layer. This package provides:
 

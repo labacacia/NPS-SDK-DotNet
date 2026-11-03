@@ -4,7 +4,7 @@
 
 > 根命名空间：`NPS.NOP`
 > NuGet：`LabAcacia.NPS.NOP`
-> 规范：[NPS-5 NOP v0.6](https://github.com/labacacia/NPS-Release/blob/main/NPS-5-NOP.md)
+> 规范：[NPS-5 NOP v0.6](https://github.com/labacacia/NPS/blob/main/NPS-5-NOP.md)
 
 NOP 是编排层。本包提供：
 

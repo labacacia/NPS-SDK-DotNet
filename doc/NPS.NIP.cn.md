@@ -4,7 +4,7 @@
 
 > 根命名空间：`NPS.NIP`
 > NuGet：`LabAcacia.NPS.NIP`
-> 规范：[NPS-3 NIP v0.9](https://github.com/labacacia/NPS-Release/blob/main/NPS-3-NIP.md)
+> 规范：[NPS-3 NIP v0.9](https://github.com/labacacia/NPS/blob/main/NPS-3-NIP.md)
 
 NIP 是身份 / PKI 层。本包覆盖：
 

@@ -9,14 +9,14 @@
     <RootNamespace>NPS.NIP</RootNamespace>
     <AssemblyName>NPS.NIP.Storage.Postgres</AssemblyName>
     <PackageId>LabAcacia.NPS.NIP.Storage.Postgres</PackageId>
-    <Version>1.0.0-alpha.19</Version>
+    <Version>1.0.0-alpha.20</Version>
     <Description>PostgreSQL storage backend for the LabAcacia.NPS.NIP CA Server. Provides PostgreSqlNipCaStore and the AddNipCaWithPostgres() DI extension.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <Authors>LabAcacia / INNO LOTUS PTY LTD</Authors>
     <Company>INNO LOTUS PTY LTD</Company>
     <PackageTags>nps;nip;ai;agent;identity;ca;certificate;postgres;postgresql;npgsql</PackageTags>
-    <PackageProjectUrl>https://github.com/labacacia/NPS-Dev</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/labacacia/NPS-Dev</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/labacacia/NPS</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/labacacia/NPS-SDK-DotNet</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.303" PrivateAssets="All" />
     <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="Npgsql" Version="8.0.7" />
   </ItemGroup>

@@ -12,7 +12,7 @@ namespace NPS.Core.Codecs;
 
 /// <summary>
 /// Tier-2 codec: MessagePack binary serialisation via MessagePack-CSharp.
-/// Produces ~60 % smaller payloads vs Tier-1 JSON; default for production.
+/// Payload size depends on data and framing; compare equivalent compressed baselines.
 /// Registered frames use source-generated formatters. The single-argument
 /// <see cref="Encode(IFrame)"/> overload retains contractless runtime generation
 /// only as a compatibility fallback for unregistered third-party frame types.

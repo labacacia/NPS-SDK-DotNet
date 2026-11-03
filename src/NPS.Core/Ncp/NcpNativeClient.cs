@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Net.Sockets;
+using System.Net.Security;
 using NPS.Core.Codecs;
 using NPS.Core.Exceptions;
 using NPS.Core.Frames;
@@ -27,9 +28,12 @@ public sealed class NcpNativeClient
     private static readonly Tier3BinaryVectorCodec BinaryVectorCodec = new();
 
     private readonly NpsFrameCodec _codec;
+    private readonly NcpNativeClientOptions _options;
 
     /// <param name="codec">Codec instance used to encode the outbound <see cref="HelloFrame"/>.</param>
-    public NcpNativeClient(NpsFrameCodec codec) => _codec = codec;
+    /// <param name="options">Host authentication hook and explicit local experimental policy; defaults enable no feature.</param>
+    public NcpNativeClient(NpsFrameCodec codec, NcpNativeClientOptions? options = null)
+    { _codec = codec; _options = options ?? new(); }
 
     /// <summary>
     /// Opens a TCP connection to <paramref name="host"/>:<paramref name="port"/>, performs
@@ -42,6 +46,10 @@ public sealed class NcpNativeClient
         HelloFrame hello,
         CancellationToken ct = default)
     {
+        NcpSchemaBatchNegotiation.ValidateClientOffer(hello, _options.SchemaBatchesEnabled);
+        var helloWire = _codec.Encode(hello, EncodingTier.Json);
+        var helloHeader = NpsFrameCodec.PeekHeader(helloWire);
+        NcpSchemaBatchNegotiation.ValidateRawHello(helloWire.AsSpan(helloHeader.HeaderSize));
         var tcp = new TcpClient();
         try
         {
@@ -53,23 +61,41 @@ public sealed class NcpNativeClient
             throw;
         }
 
-        var stream = tcp.GetStream();
+        Stream stream = tcp.GetStream();
         try
         {
+            if (_options.AuthenticateStreamAsync is { } authenticate)
+            {
+                var authenticated = await authenticate(tcp, stream, ct).ConfigureAwait(false);
+                if (authenticated is null || _options.RequireAuthenticatedStream && ReferenceEquals(authenticated, stream))
+                    throw new NpsFrameException("Native client authentication hook did not verify a wrapped transport.");
+                stream = authenticated;
+            }
+            else if (_options.RequireAuthenticatedStream)
+                throw new NpsFrameException("Native client requires a host transport authentication hook.");
             // 1 — preamble (Tier-1 JSON encoding not yet negotiated)
             await NcpPreamble.WriteAsync(stream, ct).ConfigureAwait(false);
 
             // 2 — HelloFrame (always JSON per spec — encoding not yet agreed)
-            var helloWire = _codec.Encode(hello, EncodingTier.Json);
             await stream.WriteAsync(helloWire, ct).ConfigureAwait(false);
             await stream.FlushAsync(ct).ConfigureAwait(false);
 
             // 3 — read server response header (handles EXT flag)
             var (header, _) = await ReadFrameHeaderAsync(stream, ct).ConfigureAwait(false);
 
+            // Validate the untrusted header BEFORE allocation or waiting for its body.
+            // This path uses a handshake-specific registry, but must still respect
+            // the same local codec ceiling as normal frame decoding.
+            ValidateResponseHeader(header, hello);
+
             // 4 — read payload
             var payload = new byte[header.PayloadLength];
             await stream.ReadExactlyAsync(payload, ct).ConfigureAwait(false);
+            if (hello.FeatureNegotiation is not null && header.FrameType == FrameType.Caps)
+            {
+                try { SchemaBatchWireGuard.Validate(payload, header.EncodingTier, header.FrameType, strictValues: false); }
+                catch (NpsException) { throw NcpSchemaBatchNegotiation.Invalid(); }
+            }
 
             // 5 — ErrorFrame → throw
             if (header.FrameType == FrameType.Error)
@@ -78,18 +104,16 @@ public sealed class NcpNativeClient
                 throw new NcpHandshakeException(err.Error, err.Message);
             }
 
-            if (header.FrameType != FrameType.Caps)
-                throw new NcpHandshakeException(
-                    "NCP-HANDSHAKE-UNEXPECTED-FRAME",
-                    $"Expected CapsFrame (0x{(byte)FrameType.Caps:X2}), got 0x{(byte)header.FrameType:X2}.");
-
             // 6 — decode NcpHandshakeCapsFrame using the negotiated tier the server
             // signalled as the stable default in the response header flags.
             var negotiatedTier = header.EncodingTier;
-            var caps = (NcpHandshakeCapsFrame)DecodeHandshakeFrame(header, payload);
+            var caps = (NcpHandshakeCapsFrame)DecodeHandshakeFrame(header, payload, hello.FeatureNegotiation is not null);
             var policy = NcpEncodingPolicy.FromEnabledEncodings(negotiatedTier, caps.EnabledEncodings);
+            var selected = NcpSchemaBatchNegotiation.ValidateResponse(hello, caps, _options.SchemaBatchesEnabled);
+            if (selected.Count != 0 && stream is not SslStream { IsAuthenticated: true, IsMutuallyAuthenticated: true })
+                throw new NcpHandshakeException(NcpErrorCodes.FeatureRequiredUnsupported, "Schema batch reference requires verified mutual TLS.");
 
-            return new NcpSession(tcp, stream, caps, policy);
+            return new NcpSession(tcp, stream, caps, policy, selected);
         }
         catch
         {
@@ -99,14 +123,59 @@ public sealed class NcpNativeClient
         }
     }
 
-    private static IFrame DecodeHandshakeFrame(FrameHeader header, ReadOnlySpan<byte> payload) =>
-        header.EncodingTier switch
+    private void ValidateResponseHeader(FrameHeader header, HelloFrame hello)
+    {
+        if (hello.FeatureNegotiation is not null && header.PayloadLength > 16384)
+            throw NcpSchemaBatchNegotiation.Invalid();
+        if (header.PayloadLength > Math.Min(hello.MaxFramePayload, _codec.MaxPayload)
+            || header.PayloadLength > int.MaxValue)
+            throw new NpsFrameException("Handshake response exceeds the local payload limit.",
+                NpsStatusCodes.LimitPayload, NcpErrorCodes.FramePayloadTooLarge);
+        if (header.IsExtended && !hello.ExtSupport)
+            throw new NpsFrameException("Extended handshake response was not offered.",
+                NpsStatusCodes.ClientBadFrame, NcpErrorCodes.FrameFlagsInvalid);
+        if (header.IsEncrypted)
+            throw new NpsFrameException("Handshake response encryption was not negotiated.",
+                NpsStatusCodes.ClientBadFrame, NcpErrorCodes.EncNotNegotiated);
+        if (header.FrameType is not (FrameType.Caps or FrameType.Error))
+            throw new NcpHandshakeException("NCP-HANDSHAKE-UNEXPECTED-FRAME",
+                "Expected a handshake CapsFrame or ErrorFrame.");
+        if (header.EncodingTier == EncodingTier.BinaryVector)
+            throw new NpsEncodingUnsupportedException("BinaryVector is not a stable handshake encoding.");
+        // Pre-admission errors may always use JSON, even for a MsgPack-only offer.
+        if (header.FrameType == FrameType.Caps)
+        {
+            var token = header.EncodingTier == EncodingTier.Json ? "json" : "msgpack";
+            if (!hello.SupportedEncodings.Contains(token, StringComparer.Ordinal))
+                throw new NpsEncodingUnsupportedException("Handshake encoding was not offered.");
+        }
+    }
+
+    private static IFrame DecodeHandshakeFrame(FrameHeader header, ReadOnlySpan<byte> payload, bool featureResponse = false)
+    {
+        if (featureResponse && header.FrameType == FrameType.Caps)
+        {
+            var body = NcpCanonicalWire.ReadBody(payload, header.EncodingTier);
+            if (header.EncodingTier == EncodingTier.MsgPack && body.ValueKind == System.Text.Json.JsonValueKind.Object
+                && body.TryGetProperty("NodeId", out _))
+            {
+                // Recognize an old base-only peer, never a PascalCase feature selection.
+                var legacy = (NcpHandshakeCapsFrame)MsgPackCodec.Decode(header.FrameType, payload, HandshakeRegistry);
+                if (legacy.FeatureNegotiation is not null || legacy.SelectedFeatures is not null) throw NcpSchemaBatchNegotiation.Invalid();
+                return legacy;
+            }
+            try { NcpCanonicalWire.ValidateEnvelopeNames(body); }
+            catch (NpsException) { throw NcpSchemaBatchNegotiation.Invalid(); }
+            return NcpCanonicalWire.DecodeBody(header.FrameType, body, HandshakeRegistry);
+        }
+        return header.EncodingTier switch
         {
             EncodingTier.Json => JsonCodec.Decode(header.FrameType, payload, HandshakeRegistry),
             EncodingTier.MsgPack => MsgPackCodec.Decode(header.FrameType, payload, HandshakeRegistry),
             EncodingTier.BinaryVector => BinaryVectorCodec.Decode(header.FrameType, payload, HandshakeRegistry),
             _ => throw new NpsCodecException($"Unsupported handshake encoding tier: {header.EncodingTier} (0x{(byte)header.EncodingTier:X2}).")
         };
+    }
 
     /// <summary>
     /// Reads a frame header from <paramref name="stream"/>, peeking the EXT flag
